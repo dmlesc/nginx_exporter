@@ -1,0 +1,7 @@
+---
+# file: nginx_proxy-role.yml
+
+- hosts: nginx
+  become: true
+  roles:
+    - nginx-proxy

@@ -1,0 +1,7 @@
+---
+# file: nginx-role.yml
+
+- hosts: nginx
+  become: true
+  roles:
+    - nginx

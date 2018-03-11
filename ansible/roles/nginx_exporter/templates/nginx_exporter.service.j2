@@ -1,0 +1,12 @@
+[Unit]
+Description=nginx_exporter
+After=network.target
+
+[Service]
+User=root
+ExecStart=/usr/bin/node nginx_exporter.js
+WorkingDirectory=/opt/nginx_exporter
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

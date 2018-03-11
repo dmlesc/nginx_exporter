@@ -1,0 +1,7 @@
+---
+# file: nodejs-role.yml
+
+- hosts: nginx
+  become: true
+  roles:
+    - nodejs

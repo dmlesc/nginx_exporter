@@ -1,0 +1,19 @@
+{
+  "name": "nginx_exporter",
+  "version": "1.0.0",
+  "description": "",
+  "main": "nginx_exporter.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dmlesc/nginx_exporter.git"
+  },
+  "author": "me",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/dmlesc/nginx_exporter/issues"
+  },
+  "homepage": "https://github.com/dmlesc/nginx_exporter#readme"
+}

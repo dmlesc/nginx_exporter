@@ -1,0 +1,7 @@
+---
+# file: nginx_exporter-role.yml
+
+- hosts: nginx
+  become: true
+  roles:
+    - nginx_exporter

@@ -1,0 +1,74 @@
+---
+# file: roles/nginx_exporter/tasks/main.yml
+
+- name: create nginx_exporter archive
+  become: false
+  archive:
+    path: "{{ repo_path }}"
+    dest: "{{ repo_path }}ansible/roles/nginx_exporter/files/nginx_exporter.tgz"
+  tags:
+    tar
+
+- name: create /opt/nginx_exporter directory
+  file:
+    path: /opt/nginx_exporter
+    state: directory
+    mode: 0775
+  tags:
+    install
+
+- name: extract nginx_exporter archive
+  unarchive:
+    src: nginx_exporter.tgz
+    dest: /opt/nginx_exporter
+    owner: root
+    group: root
+  tags:
+    install
+
+- name: copy systemd nginx_exporter.service
+  template:
+    src: nginx_exporter.service.j2
+    dest: /lib/systemd/system/nginx_exporter.service
+    owner: root
+    group: root
+    mode: 0644
+    backup: no
+  notify:
+    - enable nginx_exporter service
+    - restart nginx_exporter service
+  tags:
+    install
+
+- name: copy nginx_exporter.js
+  template:
+    src: "{{ repo_path }}/nginx_exporter.js"
+    dest: /opt/nginx_exporter/nginx_exporter.js
+    owner: root
+    group: root
+    mode: 0644
+    backup: no
+  notify:
+    - restart nginx_exporter service
+
+- name: copy metrics.js
+  template:
+    src: "{{ repo_path }}/metrics.js"
+    dest: /opt/nginx_exporter/metrics.js
+    owner: root
+    group: root
+    mode: 0644
+    backup: no
+  notify:
+    - restart nginx_exporter service
+
+- name: copy log.js
+  template:
+    src: "{{ repo_path }}/log.js"
+    dest: /opt/nginx_exporter/log.js
+    owner: root
+    group: root
+    mode: 0644
+    backup: no
+  notify:
+    - restart nginx_exporter service

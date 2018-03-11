@@ -1,0 +1,14 @@
+---
+# file: roles/nginx_exporter/handlers/main.yml
+
+- name: enable nginx_exporter service
+  systemd:
+    daemon_reload: yes
+    name: nginx_exporter
+    enabled: yes
+    masked: no
+
+- name: restart nginx_exporter service
+  systemd:
+    name: nginx_exporter
+    state: restarted

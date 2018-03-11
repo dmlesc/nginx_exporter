@@ -1,0 +1,6 @@
+
+
+
+ansible-playbook -i env-local/ --limit=dml0 --tags "tar" nginx_exporter-role.yml
+ansible-playbook -i env-local/ --limit=nginx0 --tags "install" nginx_exporter-role.yml
+ansible-playbook -i env-local/ --limit=nginx0 --skip-tags "install, tar" nginx_exporter-role.yml
