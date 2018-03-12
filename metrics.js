@@ -6,7 +6,8 @@ var port = 9113;
 var ip = '0.0.0.0';
 const http = require('http');
 var register = {};
-const prefix = 'nginx_exporter_';
+const proc_prefix = 'nginx_exporter_process_';
+const prefix = 'nginx_';
 
 var metrics = () => {  
   var start_cpu_usage = process.cpuUsage();
@@ -26,17 +27,32 @@ var metrics = () => {
       cpu_usage_user += cpu.user;
       cpu_usage_system += cpu.system;
   
-      data += prefix + 'process_uptime ' + uptime + '\n'; 
-      data += prefix + 'process_memory{type="rss"} ' + mem.rss + '\n'; 
-      data += prefix + 'process_memory{type="heapUsed"} ' + mem.heapUsed + '\n'; 
-      data += prefix + 'process_memory{type="heapTotal"} ' + mem.heapTotal + '\n'; 
-      data += prefix + 'process_cpu{type="user"} ' + cpu.user + '\n'; 
-      data += prefix + 'process_cpu{type="system"} ' + cpu.system + '\n'; 
-      data += prefix + 'process_cpu_total{type="user"} ' + cpu_usage_user + '\n'; 
-      data += prefix + 'process_cpu_total{type="system"} ' + cpu_usage_system + '\n'; 
+      data += proc_prefix + 'uptime ' + uptime + '\n'; 
+      data += proc_prefix + 'memory{type="rss"} ' + mem.rss + '\n'; 
+      data += proc_prefix + 'memory{type="heapUsed"} ' + mem.heapUsed + '\n'; 
+      data += proc_prefix + 'memory{type="heapTotal"} ' + mem.heapTotal + '\n'; 
+      data += proc_prefix + 'process_cpu{type="user"} ' + cpu.user + '\n'; 
+      data += proc_prefix + 'cpu{type="system"} ' + cpu.system + '\n'; 
+      data += proc_prefix + 'cpu_total{type="user"} ' + cpu_usage_user + '\n'; 
+      data += proc_prefix + 'cpu_total{type="system"} ' + cpu_usage_system + '\n'; 
 
       Object.keys(register).forEach( (metric) => {
-        data += prefix + metric + ' ' + register[metric]['value'] + '\n';
+        if (register[metric]['labels']) {
+          var labels = register[metric]['labels'];
+
+          Object.keys(labels).forEach( (label) => {
+            var label_values = register[metric]['labels'][label];
+
+            Object.keys(label_values).forEach( (label_value) => {
+              var value = label_values[label_value];
+              data += prefix + metric + '{' + label + '="' + label_value + '"} ' + value + '\n';
+              register[metric]['labels'][label][label_value] = 0;
+            });
+          });
+        }
+        else {
+          data += prefix + metric + ' ' + register[metric]['value'] + '\n';
+        }
       });
     }
     else {
@@ -52,8 +68,13 @@ var metrics = () => {
   log('metrics', 'ready to serve metrics');
 }
 
-metrics.register = (name) => {
+metrics.register = (name, label) => {
   register[name] = {start:0, value:0};
+  if (label) {
+    log('label:' + label);
+    register[name]['labels'] = {};
+    register[name]['labels'][label] = {};
+  }
 }
 
 metrics.startTime = (name) => {
@@ -80,4 +101,14 @@ metrics.inc = (name, v) => {
   }
   register[name]['value'] = value;
 }
+
+metrics.incLabels = (name, label, label_value) => {
+  var value = 0;
+  if (register[name]['labels'][label][label_value]) {
+    value = register[name]['labels'][label][label_value];
+  }
+  value++;
+  register[name]['labels'][label][label_value] = value;
+}
+
 module.exports = metrics;

@@ -6,11 +6,12 @@ const { spawn } = require('child_process');
 
 var m = require('./metrics');
 m();
-m.register('requests_count');
-m.register('request_time_ms_sum');
+m.register('requests_total');
+m.register('body_bytes_sent_total');
+m.register('request_time_ms_total');
+m.register('request_count', 'status');
 
-//const tail_files = ['/var/log/nginx/access.log','/var/log/nginx/error.log'];
-const tail_files = ['/var/log/nginx/access.log'];
+const tail_file = '/var/log/nginx/access.log';
 
 function spawns(file) {
   const tcpdump = spawn('tail', ['-f', file]);
@@ -19,27 +20,28 @@ function spawns(file) {
   tcpdump.on('close', (code) => { log('close:', code); });
   
   tcpdump.stdout.on('data', (data) => {
-    //log(data.toString());
+    log(data.toString());
     var line = data.toString().split(' ');
+    //var method = line[5].slice(1);
     var status = line[8];
+    var body_bytes_sent = Number(line[9]);
     var response_time = sec2ms(line[line.length - 1]);
     
-    log(status + ' - ' + response_time);
+    log(status + ' - ' + body_bytes_sent + ' - ' + response_time);
     
-    m.inc('requests_count');
-    m.inc('request_time_ms_sum', response_time);
+    m.inc('requests_total');
+    m.inc('body_bytes_sent_total', body_bytes_sent);
+    m.inc('request_time_ms_total', response_time);
+    m.incLabels('request_count', 'status', status);
   });
 }
 
 function sec2ms(str) {
-  var str = str.replace(/\"/g, '').split('.'); 
+  var str = str.split('.');
   var seconds = Number(str[0]);
   var decimal = Number(str[1]);
   var ms = (seconds * 1000) + decimal;
-
   return ms;
 }
 
-for (var i=0; i<tail_files.length; i++) {
-  spawns(tail_files[i]);
-}
+spawns(tail_file);

@@ -4,3 +4,53 @@
 ansible-playbook -i env-local/ --limit=dml0 --tags "tar" nginx_exporter-role.yml
 ansible-playbook -i env-local/ --limit=nginx0 --tags "install" nginx_exporter-role.yml
 ansible-playbook -i env-local/ --limit=nginx0 --skip-tags "install, tar" nginx_exporter-role.yml
+
+
+http://192.168.2.71/1M.txt
+http://192.168.2.71/2M.txt
+
+
+request_count{status="200"} 5
+request_count{status="304"} 5
+request_count{status="404"} 5
+request_count{status="500"} 5
+
+request_time_ms{quantile="0.1"} 100
+request_time_ms{quantile="0.5"} 500
+request_time_ms{quantile="0.9"} 900
+request_time_ms{quantile="0.99"} 999
+
+
+{
+  register: {
+    request_count: {
+      labels: {
+        status: {
+          200: 5
+          304: 3
+        }
+      }
+    }
+  }
+}
+
+
+
+http_request_duration_microseconds{handler="prometheus",quantile="0.5"} 13250.039
+http_request_duration_microseconds{handler="prometheus",quantile="0.9"} 15124.788
+http_request_duration_microseconds{handler="prometheus",quantile="0.99"} 16358.601
+http_request_duration_microseconds_sum{handler="prometheus"} 1.2592077788200045e+08
+
+
+
+http_request_duration_microseconds{handler="prometheus",quantile="0.5"} 13250.039
+http_request_duration_microseconds{handler="prometheus",quantile="0.9"} 15124.788
+http_request_duration_microseconds{handler="prometheus",quantile="0.99"} 16358.601
+http_request_duration_microseconds_sum{handler="prometheus"} 1.2592077788200045e+08
+http_request_duration_microseconds_count{handler="prometheus"} 9460
+
+http_request_size_bytes{handler="prometheus",quantile="0.5"} 163
+http_request_size_bytes{handler="prometheus",quantile="0.9"} 163
+http_request_size_bytes{handler="prometheus",quantile="0.99"} 163
+http_request_size_bytes_sum{handler="prometheus"} 1.54198e+06
+http_request_size_bytes_count{handler="prometheus"} 9460
