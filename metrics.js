@@ -71,7 +71,6 @@ var metrics = () => {
 metrics.register = (name, label) => {
   register[name] = {start:0, value:0};
   if (label) {
-    log('label:' + label);
     register[name]['labels'] = {};
     register[name]['labels'][label] = {};
   }
