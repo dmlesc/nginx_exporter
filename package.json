@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/dmlesc/nginx_exporter/issues"
   },
-  "homepage": "https://github.com/dmlesc/nginx_exporter#readme"
+  "homepage": "https://github.com/dmlesc/nginx_exporter#readme",
+  "dependencies": {
+    "tail": "^1.2.3"
+  }
 }

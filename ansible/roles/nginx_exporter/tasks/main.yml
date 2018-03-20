@@ -23,6 +23,8 @@
     dest: /opt/nginx_exporter
     owner: root
     group: root
+  notify:
+    - restart nginx_exporter service
   tags:
     install
 

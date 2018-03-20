@@ -1,4 +1,4 @@
-
+npm install tail --save
 
 
 ansible-playbook -i env-local/ --limit=dml0 --tags "tar" nginx_exporter-role.yml
