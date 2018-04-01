@@ -1,19 +1,19 @@
 'use strict';
-var log = require('./log');
-process.on('uncaughtException', (err) => { log(err); });
+const log = require('./log');
+process.on('uncaughtException', (err) => { log('uncaught', err.stack); });
 
-var port = 9113;
-var ip = '0.0.0.0';
+const port = 9113;
+const ip = '0.0.0.0';
 const http = require('http');
-var register = {};
 const proc_prefix = 'nginx_exporter_process_';
 const prefix = 'nginx_';
+var register = {};
 
 var metrics = () => {  
   var start_cpu_usage = process.cpuUsage();
   var cpu_usage_user = 0;
   var cpu_usage_system = 0;
-  
+
   const server = http.createServer((req, res) => {
     //log(new Date().toJSON() + ' - ' + req.url);
     var code = 200;
@@ -41,13 +41,32 @@ var metrics = () => {
           var labels = register[metric]['labels'];
 
           Object.keys(labels).forEach( (label) => {
-            var label_values = register[metric]['labels'][label];
+            if (label == 'quantiles') {
+              var q = register[metric].quantiles;
+              var m = register[metric].measurements;
+              m.sort((a, b) => {return a - b});
 
-            Object.keys(label_values).forEach( (label_value) => {
-              var value = label_values[label_value];
-              data += prefix + metric + '{' + label + '="' + label_value + '"} ' + value + '\n';
-              register[metric]['labels'][label][label_value] = 0;
-            });
+              for (var i=0; i<q.length; i++) {
+                var value = 0;
+                var index = Math.round(q[i] * m.length);
+
+                if (index > 0) { index--; }
+                if (m.length) { value = m[index]; }
+
+                data += prefix + metric + '{quantile="' + q[i] + '"} ' + value + '\n';
+              }
+
+              register[metric].measurements = [];
+            }
+            else {
+              var label_values = register[metric]['labels'][label];
+
+              Object.keys(label_values).forEach( (label_value) => {
+                var value = label_values[label_value];
+                data += prefix + metric + '{' + label + '="' + label_value + '"} ' + value + '\n';
+                register[metric]['labels'][label][label_value] = 0;
+              });
+            }
           });
         }
         else {
@@ -68,11 +87,15 @@ var metrics = () => {
   log('metrics', 'ready to serve metrics');
 }
 
-metrics.register = (name, label) => {
+metrics.register = (name, label, quantiles) => {
   register[name] = {start:0, value:0};
   if (label) {
     register[name]['labels'] = {};
     register[name]['labels'][label] = {};
+  }
+  if (label == 'quantiles' && quantiles) {
+    register[name].quantiles = quantiles;
+    register[name].measurements = [];
   }
 }
 
@@ -108,6 +131,10 @@ metrics.incLabels = (name, label, label_value) => {
   }
   value++;
   register[name]['labels'][label][label_value] = value;
+}
+
+metrics.quantiles = (name, measurement) => {
+  register[name].measurements.push(measurement);
 }
 
 module.exports = metrics;

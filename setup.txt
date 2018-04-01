@@ -21,14 +21,12 @@ request_time_ms{quantile="0.9"} 900
 request_time_ms{quantile="0.99"} 999
 
 
-{
-  register: {
-    request_count: {
-      labels: {
-        status: {
-          200: 5
-          304: 3
-        }
+register: {
+  request_count: {
+    labels: {
+      status: {
+        200: 5
+        304: 3
       }
     }
   }
