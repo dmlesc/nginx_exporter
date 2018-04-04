@@ -3,7 +3,7 @@ const log = require('./log');
 process.on('uncaughtException', (err) => { log('uncaught', err, err.stack); });
 
 const s_pos = 8;
-const rt_pos = 23;
+//const rt_pos = 23;
 
 var m = require('./metrics');
 m();
@@ -20,7 +20,7 @@ tail.on('line', (data) => {
   //log(data);
   var line = data.split(' ');
   var status = line[s_pos];
-  var request_time = sec2ms(line[rt_pos]);
+  var request_time = sec2ms(line[line.length - 1]);
   
   log('log', status, request_time);
   

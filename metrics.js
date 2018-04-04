@@ -48,10 +48,12 @@ var metrics = () => {
 
               for (var i=0; i<q.length; i++) {
                 var value = 0;
-                var index = Math.round(q[i] * m.length);
 
-                if (index > 0) { index--; }
-                if (m.length) { value = m[index]; }
+                if (m.length) {
+                  var index = Math.round(q[i] * m.length);
+                  if (index > 0) { index--; }
+                    value = m[index];
+                }
 
                 data += prefix + metric + '{quantile="' + q[i] + '"} ' + value + '\n';
               }

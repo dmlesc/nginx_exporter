@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/dmlesc/nginx_exporter#readme",
   "dependencies": {
+    "request": "^2.85.0",
     "tail": "^1.2.3"
   }
 }

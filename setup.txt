@@ -10,6 +10,19 @@ http://192.168.2.71/1M.txt
 http://192.168.2.71/2M.txt
 
 
+dd if=/dev/zero of=4K.txt bs=4K count=1
+dd if=/dev/zero of=8K.txt bs=4K count=2
+dd if=/dev/zero of=1M.txt bs=4K count=250
+dd if=/dev/zero of=2M.txt bs=4K count=500
+dd if=/dev/zero of=3M.txt bs=4K count=750
+dd if=/dev/zero of=4M.txt bs=4K count=1000
+
+
+node test.js 1000 4M.txt
+node testAsync.js 1000 4M.txt 200
+
+
+
 request_count{status="200"} 5
 request_count{status="304"} 5
 request_count{status="404"} 5
@@ -19,6 +32,7 @@ request_time_ms{quantile="0.1"} 100
 request_time_ms{quantile="0.5"} 500
 request_time_ms{quantile="0.9"} 900
 request_time_ms{quantile="0.99"} 999
+
 
 
 register: {
