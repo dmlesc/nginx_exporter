@@ -11,10 +11,12 @@ m.register('requests_total');
 m.register('request_time_ms_total');
 m.register('request_count', 'status');
 m.register('request_time_ms', 'quantiles', [0.1, 0.5, 0.9, 0.99]);
+m.register('request_time_status_ms', 'status', [0.1, 0.5, 0.9, 0.99]);
 
 const tail_file = '/var/log/nginx/access.log';
 const Tail = require('tail').Tail;
 const tail = new Tail(tail_file);
+tail.on('error', (err) => { log('ERROR', err.stack); });
 
 tail.on('line', (data) => {
   //log(data);
@@ -28,10 +30,9 @@ tail.on('line', (data) => {
   m.inc('request_time_ms_total', request_time);
   m.incLabels('request_count', 'status', status);
   m.quantiles('request_time_ms', request_time);
+  m.quantilesLabels('request_time_status_ms', 'status', status, request_time);
 });
  
-tail.on('error', (err) => { log('ERROR', err, err.stack); });
-
 function sec2ms(time) {
   var time = time.split('.');
   var ms = (Number(time[0]) * 1000) + Number(time[1]);

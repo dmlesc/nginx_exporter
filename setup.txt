@@ -12,13 +12,23 @@ http://192.168.2.71/2M.txt
 
 dd if=/dev/zero of=4K.txt bs=4K count=1
 dd if=/dev/zero of=8K.txt bs=4K count=2
-dd if=/dev/zero of=1M.txt bs=4K count=250
-dd if=/dev/zero of=2M.txt bs=4K count=500
-dd if=/dev/zero of=3M.txt bs=4K count=750
-dd if=/dev/zero of=4M.txt bs=4K count=1000
+dd if=/dev/zero of=16K.txt bs=4K count=4
+dd if=/dev/zero of=32K.txt bs=4K count=8
+dd if=/dev/zero of=64K.txt bs=4K count=16
+dd if=/dev/zero of=128K.txt bs=4K count=32
+dd if=/dev/zero of=256K.txt bs=4K count=64
+dd if=/dev/zero of=512K.txt bs=4K count=128
+dd if=/dev/zero of=1M.txt bs=4K count=256
+dd if=/dev/zero of=2M.txt bs=4K count=512
+dd if=/dev/zero of=3M.txt bs=4K count=768
+dd if=/dev/zero of=4M.txt bs=4K count=1024
 
 
 node test.js 1000 4M.txt
+node test.js 1000 8K.txt
+node test.js 1000 1M.txt
+node testAsync.js 200 250K.txt 250
+node testAsync.js 200 500K.txt 250
 node testAsync.js 1000 4M.txt 200
 
 
@@ -34,18 +44,62 @@ request_time_ms{quantile="0.9"} 900
 request_time_ms{quantile="0.99"} 999
 
 
+nginx_request_count{status="200"} 0
+nginx_request_count{status="304"} 0
+nginx_request_count{status="404"} 0
+
+
+nginx_request_time_ms{status="200",quantile="0.1"} 0
+nginx_request_time_ms{status="200",quantile="0.5"} 0
+nginx_request_time_ms{status="200",quantile="0.9"} 0
+nginx_request_time_ms{status="200",quantile="0.99"} 0
+
+nginx_request_time_ms{status="304",quantile="0.1"} 0
+nginx_request_time_ms{status="304",quantile="0.5"} 0
+nginx_request_time_ms{status="304",quantile="0.9"} 0
+nginx_request_time_ms{status="304",quantile="0.99"} 0
+
+nginx_request_time_ms{status="404",quantile="0.1"} 0
+nginx_request_time_ms{status="404",quantile="0.5"} 0
+nginx_request_time_ms{status="404",quantile="0.9"} 0
+nginx_request_time_ms{status="404",quantile="0.99"} 0
+
+
+
 
 register: {
   request_count: {
     labels: {
       status: {
-        200: 5
+        200: 5,
         304: 3
       }
     }
   }
 }
 
+register: {
+  request_time_ms: {
+    quantiles: [0.1, 0.5, 0.9, 0.99],
+    measurements: [...],
+    labels: {
+      quantiles: {}
+    }
+  }
+}
+
+register: {
+  request_time_status_ms: {
+    quantiles: [0.1, 0.5, 0.9, 0.99],
+    measurements: [],
+    labels: {
+      status: {
+        200: [...],
+        304: [...]
+      }
+    }
+  }
+}
 
 
 http_request_duration_microseconds{handler="prometheus",quantile="0.5"} 13250.039
